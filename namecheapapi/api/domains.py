@@ -645,8 +645,40 @@ class DomainAPI(Session):
                 [ns.text for ns in xml.findall(self._tag('Nameserver'))]
         }
 
-    def get_host_records(self):
-        pass
+    def get_host_records(self, domain):
+        """ Retrieves DNS host record settings for the requested domain
+
+        https://www.namecheap.com/support/api/methods/domains-dns/get-hosts.aspx
+
+        Arguments:
+            domain -- domain name. Can be a string ('domain.tld') or a
+                list/tuple of two elements: ('domain', 'tld').
+
+        Returns:
+            A list of dicts with DNS host records
+            [{'HostId': '999999',
+            'Name': 'ipv6',
+            'TTL': '60',
+            'MXPref': '10',
+            'Address': 'ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+            'FriendlyName': '',
+            'Type': 'AAAA',
+            'IsDDNSEnabled': 'false',
+            'IsActive': 'true',
+            'AssociatedAppTitle': ''}]
+
+        Raises:
+            TypeError -- if domain argument is not str or tuple.
+        """
+        host_name, tld = self._normalize_domain(domain)
+
+        xml = self._call(
+            DOMAINS_GET_HOSTS, {'SLD': host_name, 'TLD': tld}).find(
+            self._tag('DomainDNSGetHostsResult'))
+
+        return [h.attrib
+                for h
+                in xml.findall(self._tag('host'))]
 
     def set_host_records(self):
         pass
