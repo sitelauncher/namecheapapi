@@ -85,9 +85,7 @@ class DomainAPI(Session):
 
         address = self._build_address_dict(address)
 
-        query = {}
-        query.update(**query)
-        query.update(**address)
+        query.update(address)
 
         xml = self._call(DOMAINS_REGISTER, query, post=True).find(
             self._tag('DomainCreateResult'))
@@ -495,7 +493,7 @@ class DomainAPI(Session):
 
         address = self._build_address_dict(address)
         query = {'DomainName': domain}
-        query.update(**address)
+        query.update(address)
 
         xml = self._call(DOMAINS_SET_CONTACTS, query, post=True).find(
             self._tag('DomainSetContactResult'))

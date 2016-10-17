@@ -70,8 +70,8 @@ class Session(object):
 
     def _form_query(self, command, query):
         d = {"Command": command}
-        d.update(**self._base_params)
-        d.update(**query)
+        d.update(self._base_params)
+        d.update(query)
         return urlencode(d)
 
     def _call(self, command, query={},
@@ -97,7 +97,7 @@ class Session(object):
         if post:
             url = self.url
             data = self._form_query(command, query).encode('ascii')
-            raw_xml = urlopen(Request(url, data)).read().decode('utf-8')
+            raw_xml = urlopen(url, data).read().decode('utf-8')
         else:
             url = self.url + self._form_query(command, query)
             raw_xml = urlopen(url).read().decode('utf-8')
