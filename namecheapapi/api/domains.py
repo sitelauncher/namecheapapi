@@ -680,8 +680,49 @@ class DomainAPI(Session):
                 for h
                 in xml.findall(self._tag('host'))]
 
-    def set_host_records(self):
-        pass
+    def set_host_records(self, domain, records):
+        """ Updates DNS host record settings for the requested domain
+
+        https://www.namecheap.com/support/api/methods/domains-dns/set-hosts.aspx
+
+        Arguments:
+            domain -- domain name. Can be a string ('domain.tld') or a
+                list/tuple of two elements: ('domain', 'tld').
+            records -- list of dicts with DNS records returned from
+                get_host_records():
+                [{'HostId': '999999',
+                'Name': 'ipv6',  # required
+                'TTL': '60',  # required
+                'MXPref': '10',  # required
+                'Address': 'ffff:ffff:ffff:ffff:ffff:ffff:ffff',  # required
+                'FriendlyName': '',
+                'Type': 'AAAA',
+                'IsDDNSEnabled': 'false',
+                'IsActive': 'true',
+                'AssociatedAppTitle': ''}]
+
+        Returns:
+            Dict with operation status:
+            {'Domain': 'domain.com', 'IsSuccess': 'true'}
+
+        Raises:
+            TypeError -- if domain argument is not str or tuple.
+        """
+        host_name, tld = self._normalize_domain(domain)
+
+        query = {'SLD': host_name, 'TLD': tld}
+        for i, record in enumerate(records, start=1):
+            query['HostName%s' % i] = record['Name']
+            query['RecordType%s' % i] = record['Type']
+            query['Address%s' % i] = record['Address']
+            query['MXPref%s' % i] = record.get('MXPref', '')
+            query['TTL%s' % i] = record['TTL']
+
+        xml = self._call(
+            DOMAINS_SET_HOSTS, query).find(
+            self._tag('DomainDNSSetHostsResult'))
+
+        return xml.attrib
 
     def get_email_forwarding(self):
         pass
