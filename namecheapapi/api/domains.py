@@ -304,7 +304,7 @@ class DomainAPI(Session):
 
         # A call is sent for every 100-item page
         # TODO: check performance on big accounts
-        for page in range(1, int(ceil(total_domains / 100)) + 1):
+        for page in range(1, int(ceil(total_domains / 100.0)) + 1):
 
             query = {
                 'ListType': _type,
