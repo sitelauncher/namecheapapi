@@ -1,9 +1,6 @@
-from .session import Session
+class WhoisguardAPI(object):
 
-
-class WhoisguardAPI:
-
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session):
         self.session = session
 
     def change_email_address(self):

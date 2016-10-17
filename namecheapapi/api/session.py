@@ -2,13 +2,12 @@
 """
 import re
 from datetime import datetime
-from urllib.parse import urlencode
-from urllib.request import urlopen, Request
+from urllib import urlencode, urlopen
+from urllib2 import Request
 from xml.etree.ElementTree import fromstring
 from xml.etree.ElementTree import tostring
-from xml.etree.ElementTree import Element
-from .exceptions import NCApiError
 
+from .exceptions import NCApiError
 
 URLS = {
     'production': 'https://api.namecheap.com/xml.response?',
@@ -18,16 +17,16 @@ URLS = {
 NAMESPACE = 'http://api.namecheap.com/xml.response'
 
 
-class Session:
+class Session(object):
     """Session class.
 
     Defines the basic connection parameters and has several methods to
     process the information received via API.
     """
 
-    def __init__(self, api_user: str, api_key: str, username: str,
-                 client_ip: str, sandbox: bool = True,
-                 coupon: str = None) -> None:
+    def __init__(self, api_user, api_key, username,
+                 client_ip, sandbox= True,
+                 coupon= None):
         """API initialization.
 
         Arguments:
@@ -53,7 +52,7 @@ class Session:
         self.gmt_offset = None
 
     @property
-    def _base_params(self) -> dict:
+    def _base_params(self):
 
         return {
             'ApiUser': self.api_user,
@@ -62,23 +61,21 @@ class Session:
             'ClientIp': self.client_ip,
         }
 
-    def _get_gmt_offset(self) -> None:
+    def _get_gmt_offset(self):
         if not self.gmt_offset:
             xml = fromstring(self.raw_query())
             self.gmt_offset = int(re.findall(
                 r'-?\d+', xml.find(self._tag('GMTTimeDifference')).text)[0])
         return self.gmt_offset
 
-    def _form_query(self, command: str, query: dict) -> str:
+    def _form_query(self, command, query):
+        d = {"Command": command}
+        d.update(**self._base_params)
+        d.update(**query)
+        return urlencode(d)
 
-        return urlencode({
-            **self._base_params,
-            "Command": command,
-            **query
-        })
-
-    def _call(self, command: str, query: dict = {},
-              raw: bool = False, post: bool = False) -> Element:
+    def _call(self, command, query={},
+              raw= False, post= False):
         """Send GET or POST request with the API call
 
         Arguments:
@@ -122,12 +119,12 @@ class Session:
 
         return xml.find(self._tag('CommandResponse'))
 
-    def _tag(self, tag: str) -> str:
+    def _tag(self, tag):
         """Create tag to navigate through ElementTree.Element object.
         """
         return '{{{}}}{}'.format(NAMESPACE, tag)
 
-    def _log_error(self, xml: Element, url: str) -> None:
+    def _log_error(self, xml, url):
         """Log an API error.
 
         Adds errors to session.errors list.
@@ -135,7 +132,7 @@ class Session:
 
         data = {
             'URL': url,
-            'XML': tostring(xml, encoding='unicode'),
+            'XML': tostring(xml, encoding='utf8'),
             'Time': datetime.now(),
             'Errors': [],
         }
@@ -157,7 +154,7 @@ class Session:
 
         self.errors.append(data)
 
-    def _log_warning(self, xml: Element, url: str) -> None:
+    def _log_warning(self, xml, url):
         """Log an API warning.
 
         Adds warnings to session.warnings list.
@@ -165,7 +162,7 @@ class Session:
 
         data = {
             'URL': url,
-            'XML': tostring(xml, encoding='unicode'),
+            'XML': tostring(xml, encoding='utf8'),
             'Time': datetime.now(),
             'Warnings': []
         }
@@ -188,7 +185,7 @@ class Session:
 
         self.warnings.append(data)
 
-    def raw_query(self, command: str = '', query: dict = {}) -> str:
+    def raw_query(self, command='', query={}):
         """Create a custom query.
 
         Base parameters (API key, API user, etc.) are included by

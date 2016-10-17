@@ -1,5 +1,4 @@
 import collections
-import typing
 from datetime import datetime
 from datetime import timedelta
 from math import ceil
@@ -20,10 +19,10 @@ OPTIONAL_ADDRESS_PARAMS = [
 
 class DomainAPI(Session):
 
-    def register(self, domain: str, years: int = 1, address: dict = {},
-                 nameservers: typing.Union[list, set, tuple] = None,
-                 coupon: str = None, add_whoisguard: bool = True,
-                 enable_whoisguard: bool = True) -> dict:
+    def register(self, domain, years=1, address={},
+                 nameservers=None,
+                 coupon=None, add_whoisguard=True,
+                 enable_whoisguard= True):
         """Register a domain name.
 
         https://www.namecheap.com/support/api/methods/domains/create.aspx
@@ -86,7 +85,9 @@ class DomainAPI(Session):
 
         address = self._build_address_dict(address)
 
-        query = {**query, **address}
+        query = {}
+        query.update(**query)
+        query.update(**address)
 
         xml = self._call(DOMAINS_REGISTER, query, post=True).find(
             self._tag('DomainCreateResult'))
@@ -102,8 +103,8 @@ class DomainAPI(Session):
             'NonRealTimeDomain': xml.get('NonRealTimeDomain').lower() == 'true'
         }
 
-    def renew(self, domain: str, years: int = 1, coupon: str = None,
-              check_status_first: bool = False) -> dict:
+    def renew(self, domain, years=1, coupon=None,
+              check_status_first=False):
         """Domain renewal option.
 
         https://www.namecheap.com/support/api/methods/domains/renew.aspx
@@ -156,8 +157,8 @@ class DomainAPI(Session):
                     self._tag('ExpiredDate')).text, '%m/%d/%Y %I:%M:%S %p')
         }
 
-    def reactivate(self, domain: str, years: int = 1,
-                   coupon: str = None) -> dict:
+    def reactivate(self, domain, years=1,
+                   coupon=None):
         """Reactivate the domain.
 
         https://www.namecheap.com/support/api/methods/domains/reactivate.aspx
@@ -196,7 +197,7 @@ class DomainAPI(Session):
             'ChargedAmount': float(xml.get('ChargedAmount')),
         }
 
-    def get_info(self, domain: str) -> dict:
+    def get_info(self, domain):
         """Get domain information.
 
         https://www.namecheap.com/support/api/methods/domains/get-info.aspx
@@ -278,8 +279,8 @@ class DomainAPI(Session):
 
         return result
 
-    def get_list(self, _type: str = 'ALL',
-                 search_term: str = None) -> typing.List[dict]:
+    def get_list(self, _type='ALL',
+                 search_term=None):
         """Get the list of domains.
 
         https://www.namecheap.com/support/api/methods/domains/get-list.aspx
@@ -303,7 +304,7 @@ class DomainAPI(Session):
 
         # A call is sent for every 100-item page
         # TODO: check performance on big accounts
-        for page in range(1, ceil(total_domains / 100) + 1):
+        for page in range(1, int(ceil(total_domains / 100)) + 1):
 
             query = {
                 'ListType': _type,
@@ -333,7 +334,7 @@ class DomainAPI(Session):
 
         return domains
 
-    def get_tld_list(self) -> typing.Dict[str, dict]:
+    def get_tld_list(self):
         """Get TLD list
 
         https://www.namecheap.com/support/api/methods/domains/get-tld-list.aspx
@@ -378,8 +379,7 @@ class DomainAPI(Session):
 
         return result
 
-    def check(self, domains: typing.Union[str, list, tuple,
-              set]) -> typing.Dict[str, bool]:
+    def check(self, domains):
         """Check domain availability.
 
         https://www.namecheap.com/support/api/methods/domains/check.aspx
@@ -406,7 +406,7 @@ class DomainAPI(Session):
 
         return result
 
-    def get_contacts(self, domain: str) -> dict:
+    def get_contacts(self, domain):
         """Obtain contact details for a domain.
 
         https://www.namecheap.com/support/api/methods/domains/get-contacts.aspx
@@ -458,7 +458,7 @@ class DomainAPI(Session):
 
         return result
 
-    def set_contacts(self, domain: str, address: dict) -> bool:
+    def set_contacts(self, domain, address):
         """Set contact information for your domain
 
         https://www.namecheap.com/support/api/methods/domains/set-contacts.aspx
@@ -494,14 +494,15 @@ class DomainAPI(Session):
         """
 
         address = self._build_address_dict(address)
-        query = {'DomainName': domain, **address}
+        query = {'DomainName': domain}
+        query.update(**address)
 
         xml = self._call(DOMAINS_SET_CONTACTS, query, post=True).find(
             self._tag('DomainSetContactResult'))
 
         return xml.get('IsSuccess').lower() == 'true'
 
-    def get_lock(self, domain: str, verbose: bool = False) -> bool:
+    def get_lock(self, domain, verbose=False):
         """Get registrar lock status
 
         https://www.namecheap.com/support/api/methods/domains/get-registrar-lock.aspx
@@ -537,7 +538,7 @@ class DomainAPI(Session):
                 xml.get('IsClientHold').lower() == 'true'
         }
 
-    def set_lock(self, domain: str, lock: bool = True) -> bool:
+    def set_lock(self, domain, lock=True):
         """Set registrar lock
 
         https://www.namecheap.com/support/api/methods/domains/set-registrar-lock.aspx
@@ -572,9 +573,7 @@ class DomainAPI(Session):
     def get_nameserver_info(self):
         pass
 
-    def set_nameservers(self, domain: typing.Sequence,
-                        nameservers: typing.Iterable = None,
-                        set_default: bool = False) -> bool:
+    def set_nameservers(self, domain, nameservers=None, set_default=False):
         """Set nameservers for a domain name.
 
         https://www.namecheap.com/support/api/methods/domains-dns/set-default.aspx
@@ -610,7 +609,7 @@ class DomainAPI(Session):
 
         return xml.get('Updated').lower() == 'true'
 
-    def get_nameservers(self, domain: typing.Sequence) -> dict:
+    def get_nameservers(self, domain):
         """Get list of nameservers
 
         https://www.namecheap.com/support/api/methods/domains-dns/get-list.aspx
@@ -670,7 +669,7 @@ class DomainAPI(Session):
     def get_transfer_list(self):
         pass
 
-    def _normalize_domain(self, domain: typing.Sequence) -> tuple:
+    def _normalize_domain(self, domain):
         if isinstance(domain, str):
             host_name, _, tld = domain.partition('.')
         elif isinstance(domain, collections.Sequence):
@@ -681,7 +680,7 @@ class DomainAPI(Session):
 
         return host_name, tld
 
-    def _build_address_dict(self, address: dict) -> dict:
+    def _build_address_dict(self, address):
 
         result = {}
 

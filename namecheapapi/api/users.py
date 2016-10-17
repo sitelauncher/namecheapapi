@@ -1,9 +1,6 @@
-from .session import Session
+class UserAPI(object):
 
-
-class UserAPI:
-
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session):
         self.session = session
 
     def get_pricing(self):

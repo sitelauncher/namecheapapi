@@ -44,18 +44,18 @@ def test_domain_get_lock():
     return api.get_lock(DOMAIN)
 
 
-def test_domain_set_lock():
-    return api.set_lock(DOMAIN, lock=True)
+# def test_domain_set_lock():
+#     return api.set_lock(DOMAIN, lock=True)
 
 
 def test_domain_get_nameservers():
     return api.get_nameservers(DOMAIN)
 
 
-def test_domain_set_nameservers():
-    return api.set_nameservers(DOMAIN, nameservers=['ns1.domainname.com',
-                                                    'ns2.domainname.com'])
+# def test_domain_set_nameservers():
+#     return api.set_nameservers(DOMAIN, nameservers=['ns1.domainname.com',
+#                                                     'ns2.domainname.com'])
 
 
-def test_domain_set_default_nameservers():
-    return api.set_nameservers(DOMAIN, set_default=True)
+# def test_domain_set_default_nameservers():
+#     return api.set_nameservers(DOMAIN, set_default=True)

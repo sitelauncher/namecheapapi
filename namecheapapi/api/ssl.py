@@ -1,9 +1,6 @@
-from .session import Session
+class SslAPI(object):
 
-
-class SslAPI:
-
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session):
         self.session = session
 
     def activate(self):
