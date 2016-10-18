@@ -716,9 +716,8 @@ class DomainAPI(Session):
             query['MXPref%s' % i] = record.get('MXPref', '')
             query['TTL%s' % i] = record['TTL']
 
-        xml = self._call(
-            DOMAINS_SET_HOSTS, query).find(
-            self._tag('DomainDNSSetHostsResult'))
+        xml = self._call(DOMAINS_SET_HOSTS, query, post=True)\
+            .find(self._tag('DomainDNSSetHostsResult'))
 
         return xml.attrib
 
