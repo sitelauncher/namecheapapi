@@ -40,12 +40,8 @@ def test_ncapi_error():
     return api._call('')
 
 
-def test_domain_get_lock():
-    return api.get_lock(DOMAIN)
-
-
-# def test_domain_set_lock():
-#     return api.set_lock(DOMAIN, lock=True)
+def test_domain_set_lock():
+    return api.set_lock(DOMAIN, lock=True)
 
 
 def test_domain_get_nameservers():
@@ -59,3 +55,8 @@ def test_domain_get_nameservers():
 
 # def test_domain_set_default_nameservers():
 #     return api.set_nameservers(DOMAIN, set_default=True)
+
+
+def get_set_host_records():
+    records = api.get_host_records(DOMAIN)
+    return api.set_host_records(DOMAIN, records)
